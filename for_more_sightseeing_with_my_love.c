@@ -140,6 +140,7 @@ int DFS(GRAPH* graph, Edge** edge_list, int i, int* travelled_destination, Trave
     int color_black_final_vertex = TRUE;
     if ((start_vertex != end_vertex) && (i == end_vertex)) {
         all_travel_stats[travel_stats_iter] = travel_stats;
+        printTravelStatsContent(travel_stats, graph->num_of_vertex);
         travel_stats_iter++;
         travel_stats->d[i - 1] = time;
         time++;
@@ -216,6 +217,7 @@ int DFS(GRAPH* graph, Edge** edge_list, int i, int* travelled_destination, Trave
             else {
                 alpha->TYPE = 'X';
             }
+            color[j - 1] = "white";
             
         }
     }
@@ -309,7 +311,6 @@ int main(void) {
                 row_iter = 0;
                 while (fgets(line, line_size, input_file) && strcmp(line, "end\n") != 0) {
                     if (row_iter == 0) {
-                        
                         num_of_vertex = getNumOfVertex(line);
                         printf("num of vertex is %d\n", num_of_vertex);
                         if (started == TRUE) {
@@ -438,6 +439,12 @@ int main(void) {
                     travel_stats->pred = malloc(num_of_vertex * sizeof(int));
                     travel_stats->d = malloc(num_of_vertex * sizeof(int));
                     travel_stats->f = malloc(num_of_vertex * sizeof(int));
+                    
+                    for(array_filler_iter = 0; array_filler_iter < num_of_vertex; array_filler_iter++) {
+                        travel_stats->pred[array_filler_iter] = 0;
+                        travel_stats->d[array_filler_iter] = 0;
+                        travel_stats->f[array_filler_iter] = 0;
+                    }
                     
                     all_travel_stats[travel_stats_iter] = travel_stats;
                     travel_stats_iter++;
