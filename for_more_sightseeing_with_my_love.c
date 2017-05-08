@@ -92,7 +92,7 @@ printColorContent(int size){
     printf("i:%d have color[i]: %s\n", i, color[i]);
 }
 
-INT DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_cost, int i, int* travelled_destination, int start_vertex, int end_vertex) {
+int DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_cost, int i, int* travelled_destination, int start_vertex, int end_vertex) {
     Node* alpha;
     int color_white_final_vertex = TRUE, traverse_list = TRUE;
     alpha = graph.node_list[i]; // at i = 1 onwards was chosen as index because if at 0, something unusual goes on   
@@ -119,7 +119,7 @@ INT DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_c
     }
     
     int j = 0;
-    Graph new_graph;
+    GRAPH new_graph;
     while (alpha != NULL) {
         alpha = alpha->NEXT;
 
@@ -154,7 +154,7 @@ INT DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_c
             alpha->TYPE = 'T';
             graph.pred[j] = i;
             fprintf(output_file, "an edge of start: %d and finish: %d is created with cost %d ", i, j, alpha->vrtx_obj->EDGE_COST_FROM[graph.pred[i]]);
-            fprintf(output_file, "and with total travel cost of %d as well as an incoming edge of %d-%d with cost %d\n", alpha->vrtx_obj->LONGEST_PATH_COST);
+            fprintf(output_file, "and with total travel cost of %d\n", alpha->vrtx_obj->LONGEST_PATH_COST);
             DFS(output_file, num_of_vertex, graph, current_longest_cost, j, travelled_destination, start_vertex, end_vertex);
         }
 
