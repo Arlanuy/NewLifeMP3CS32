@@ -105,7 +105,7 @@ int DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_c
                 alpha->vrtx_obj->LONGEST_PRED_PATH[c] = graph.pred[c];    
             }
         }
-        graph.d[i] = time;        
+        graph.d[i - 1] = time;        
         time++;
         traverse_list = FALSE;
         *travelled_destination = TRUE;
@@ -114,7 +114,7 @@ int DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_c
 
     else {
         color[i - 1] = "gray";
-        graph.d[i] = time;
+        graph.d[i - 1] = time;
         time++;
     }
     
@@ -152,18 +152,18 @@ int DFS(FILE* output_file, int num_of_vertex, GRAPH graph, int current_longest_c
         
         if ((traverse_list == TRUE) && (strcmp(color[j - 1], "white") == 0)) {
             alpha->TYPE = 'T';
-            graph.pred[j] = i;
-            fprintf(output_file, "an edge of start: %d and finish: %d is created with cost %d ", i, j, alpha->vrtx_obj->EDGE_COST_FROM[graph.pred[i]]);
+            graph.pred[j - 1] = i;
+            fprintf(output_file, "an edge of start: %d and finish: %d is created with cost %d ", i, j, alpha->vrtx_obj->EDGE_COST_FROM[graph.pred[i - 1]]);
             fprintf(output_file, "and with total travel cost of %d\n", alpha->vrtx_obj->LONGEST_PATH_COST);
             DFS(output_file, num_of_vertex, graph, current_longest_cost, j, travelled_destination, start_vertex, end_vertex);
         }
 
         else if (strcmp(color[j - 1], "gray") == 0) {
-            if (graph.pred[i] != j) {
+            if (graph.pred[i - 1] != j) {
                 alpha->TYPE = 'B';
             }
             if ((start_vertex == end_vertex) && (end_vertex == j)) {
-                current_longest_cost += alpha->vrtx_obj->EDGE_COST_FROM[graph.pred[i]];
+                current_longest_cost += alpha->vrtx_obj->EDGE_COST_FROM[graph.pred[i - 1]];
                 if (current_longest_cost > alpha->vrtx_obj->LONGEST_PATH_COST) {
                     alpha->vrtx_obj->LONGEST_PATH_COST = current_longest_cost;
                     int c;
@@ -241,7 +241,7 @@ int main(void) {
 
     //for menu choice
     int success_choice = FALSE, num_menu;
-    char* line = malloc(sizeof(line_size)), *str_vertex_pair = malloc(sizeof(line_size));
+    char* line = malloc(line_size * sizeof(char)), *str_vertex_pair = malloc(line_size * sizeof(char));
     assert(line != NULL);
     assert(str_vertex_pair != NULL);
     char* menu_choice = malloc(sizeof(char) * menuchoice_size);
@@ -253,9 +253,9 @@ int main(void) {
 
     //for the graph
     GRAPH graph;
-    graph.pred = malloc(num_of_vertex * sizeof(int));
-    graph.d = malloc(num_of_vertex * sizeof(int));
-    graph.f = malloc(num_of_vertex * sizeof(int));
+    graph.pred[num_of_vertex]; //= malloc(num_of_vertex * sizeof(int));
+    graph.d[num_of_vertex];//=malloc(num_of_vertex * sizeof(int));
+    graph.f[num_of_vertex];//=malloc(num_of_vertex * sizeof(int));
     int vertex_create_iter, array_filler_iter;
     int start_vertex = 0, end_vertex = 0;
     graph.node_list = NULL;
@@ -314,6 +314,7 @@ int main(void) {
                 //constructing the graph
 
                  graph.node_list = malloc(sizeof(Node*) * (num_of_vertex + 1));
+                 int vertex_create_iter;
                  for (vertex_create_iter = 0; vertex_create_iter <= num_of_vertex; vertex_create_iter++) {
                     node = malloc(sizeof(Node));
                     graph.node_list[vertex_create_iter] = node;
@@ -336,14 +337,20 @@ int main(void) {
                 
                 vrtx_obj_2D = malloc(num_of_vertex * sizeof(Vrtx_Obj));
                 assert(vrtx_obj_2D != NULL);
+                
                 for (vertex_trav_iter = 1; vertex_trav_iter <= num_of_vertex; vertex_trav_iter++) {
                     rover = graph.node_list[vertex_trav_iter];
-                    node->vrtx_obj->EDGE_COST_FROM = malloc((num_of_vertex - 1) * sizeof(int));
                     vrtx_obj_2D[vertex_trav_iter - 1] = malloc(sizeof(Vrtx_Obj));
                     assert(vrtx_obj_2D[vertex_trav_iter - 1] != NULL);
                     rover->vrtx_obj = vrtx_obj_2D[vertex_trav_iter - 1];
+                    vrtx_obj_2D[vertex_trav_iter - 1]->EDGE_COST_FROM = malloc((num_of_vertex - 1) * sizeof(int));
+                    assert(vrtx_obj_2D[vertex_trav_iter - 1]->EDGE_COST_FROM != NULL);
                     vrtx_obj_2D[vertex_trav_iter - 1]->LONGEST_PRED_PATH = malloc(num_of_vertex * sizeof(int));
-                    assert(vrtx_obj_2D[vertex_trav_iter - 1]->LONGEST_PRED_PATH != NULL);
+                    assert(vrtx_obj_2D[vertex_trav_iter - 1]->LONGEST_PRED_PATH != NULL);    
+                }
+                
+                for (vertex_trav_iter = 1; vertex_trav_iter <= num_of_vertex; vertex_trav_iter++) {
+                    rover = graph.node_list[vertex_trav_iter];
                     for (vertex_trav_iter2 = 1; vertex_trav_iter2 <= num_of_vertex; vertex_trav_iter2++) {
                         if (cost_adj_mat[vertex_trav_iter - 1][vertex_trav_iter2 - 1] != 1000 && cost_adj_mat[vertex_trav_iter - 1][vertex_trav_iter2 - 1] != 0) {
                             node = malloc(sizeof(Node));
