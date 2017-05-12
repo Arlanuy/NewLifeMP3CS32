@@ -97,11 +97,12 @@ int DFS(FILE* output_file, int num_of_vertex, GRAPH* graph, int current_longest_
     int color_white_final_vertex = TRUE, traverse_list = TRUE;
     alpha = graph->node_list[i]; // at i = 1 onwards was chosen as index because if at 0, something unusual goes on   
     if ((start_vertex != end_vertex) && (i == end_vertex)) {
-        current_longest_cost += alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i]];
-        printf("clc after: %d edge_cost: %d graph pred: %d\n", current_longest_cost, alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i]], graph->pred[i]);
+        current_longest_cost += alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i - 1] - 1];
+        printf("clc after: %d vrtx_obj: %d edge_cost: %d graph pred: %d\n", current_longest_cost, alpha->VRTX, alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i - 1] - 1], graph->pred[i - 1]);
         printArrContent(alpha->vrtx_obj->EDGE_COST_FROM, num_of_vertex - 1);
         if (current_longest_cost > alpha->vrtx_obj->LONGEST_PATH_COST) {
             alpha->vrtx_obj->LONGEST_PATH_COST = current_longest_cost;
+            current_longest_cost = 0;
             int c;
             for (c = 0; c < num_of_vertex; c++) {
                 alpha->vrtx_obj->LONGEST_PRED_PATH[c] = graph->pred[c];    
@@ -155,9 +156,19 @@ int DFS(FILE* output_file, int num_of_vertex, GRAPH* graph, int current_longest_
         if ((traverse_list == TRUE) && (strcmp(color[j - 1], "white") == 0)) {
             alpha->TYPE = 'T';
             graph->pred[j - 1] = i;
+             current_longest_cost += alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i - 1] - 1];
+            printf("clc after: %d vrtx_obj: %d edge_cost: %d graph pred: %d\n", current_longest_cost, alpha->VRTX, alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i - 1] - 1], graph->pred[i - 1]);
+            printArrContent(alpha->vrtx_obj->EDGE_COST_FROM, num_of_vertex - 1);
+            if (current_longest_cost > alpha->vrtx_obj->LONGEST_PATH_COST) {
+                alpha->vrtx_obj->LONGEST_PATH_COST = current_longest_cost;
+                int c;
+                for (c = 0; c < num_of_vertex; c++) {
+                    alpha->vrtx_obj->LONGEST_PRED_PATH[c] = graph->pred[c];    
+                }
+            }
             fprintf(output_file, "an edge of start: %d and finish: %d is created with cost %d ", i, j, alpha->vrtx_obj->EDGE_COST_FROM[graph->pred[i - 1]]);
             fprintf(output_file, "and with total travel cost of %d\n", alpha->vrtx_obj->LONGEST_PATH_COST);
-            DFS(output_file, num_of_vertex, graph, current_longest_cost, j, travelled_destination, start_vertex, end_vertex);
+            current_longest_cost = DFS(output_file, num_of_vertex, graph, current_longest_cost, j, travelled_destination, start_vertex, end_vertex);
         }
 
         else if (strcmp(color[j - 1], "gray") == 0) {
@@ -356,6 +367,7 @@ int main(void) {
                 
                 for (vertex_trav_iter = 1; vertex_trav_iter <= num_of_vertex; vertex_trav_iter++) {
                     rover = graph->node_list[vertex_trav_iter];
+                    rover->vrtx_obj->VRTX = vertex_trav_iter;
                     for (vertex_trav_iter2 = 1; vertex_trav_iter2 <= num_of_vertex; vertex_trav_iter2++) {
                         if (cost_adj_mat[vertex_trav_iter - 1][vertex_trav_iter2 - 1] != 1000 && cost_adj_mat[vertex_trav_iter - 1][vertex_trav_iter2 - 1] != 0) {
                             node = malloc(sizeof(Node));
@@ -425,22 +437,25 @@ int main(void) {
                     if (travelled_destination == TRUE) {
                         int* traverser = malloc(num_of_vertex * sizeof(int)), still_traverse = TRUE;
                         printf("Total cost %d There is a longest path and it is ", current_longest_cost);
-                        Vrtx_Obj* vrtx_obj;
+                        Vrtx_Obj* vrtx_obj, *vrtx_obj_trav;
+                        printf("end vertex is %d\n", end_vertex);
                         vrtx_obj = graph->node_list[end_vertex]->vrtx_obj;
                         vertex_path_finder = vrtx_obj->LONGEST_PRED_PATH[end_vertex - 1];
                         
                         for (vertex_reverser_iter = num_of_vertex - 1; still_traverse != FALSE; vertex_path_finder = vrtx_obj->LONGEST_PRED_PATH[vertex_path_finder - 1]) {
                             if (vertex_path_finder != 0) {
                                 traverser[vertex_reverser_iter] = vertex_path_finder;
-                                printf("%d-%d with cost %d\n", vrtx_obj->VRTX, vrtx_obj->LONGEST_PRED_PATH[vertex_path_finder - 1], vrtx_obj->LONGEST_PATH_COST);
+                                printf("%d-%d with cost %d\n", vrtx_obj_trav->VRTX, vertex_path_finder, vrtx_obj->LONGEST_PATH_COST);
+                                vrtx_obj_trav = graph->node_list[vertex_path_finder]->vrtx_obj;
                             }
+                            
                             
                             if (vertex_path_finder == 0) {
                                 still_traverse = FALSE;
                             }
                             
                             else if (vrtx_obj->LONGEST_PRED_PATH[vertex_path_finder - 1] == 0) {
-                                printf("%d\n", vertex_path_finder);
+                                printf("%d\n", vertex_path_finder);             
 
                             } 
                             vertex_reverser_iter--;
